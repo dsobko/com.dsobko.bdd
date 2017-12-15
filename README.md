@@ -1,2 +1,2 @@
 # com.dsobko.bdd
-BDD framework example
+BDD framework example with Kotlin, Spring Boot, Cucumber

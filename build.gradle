@@ -1,0 +1,111 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.1.4'
+        springbootVersion = '1.5.4.RELEASE'
+        cucumberVersion = '1.2.5'
+        restassuredVersion = '3.0.2'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springbootVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}
+
+
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: "kotlin-allopen"
+apply plugin: 'spring-boot'
+apply plugin: 'idea'
+apply plugin: 'application'
+configurations {
+    ktlint
+}
+
+jar {
+    baseName = 'functional-tests'
+    version = '1.0.0-SNAPSHOT'
+}
+sourceCompatibility = 1.8
+mainClassName = "com.dsobko.CucumberFeaturesRunner"
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-dependencies:${springbootVersion}"
+    compile 'org.springframework.boot:spring-boot-starter-jdbc'
+    compile('org.springframework.boot:spring-boot-starter-test')
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    compile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.3"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.8.6"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.6"
+
+    compile "ch.qos.logback:logback-core:1.1.3"
+    compile "ch.qos.logback:logback-classic:1.0.1"
+
+    runtime 'org.postgresql:postgresql'
+
+    compile "info.cukes:cucumber-java8:$cucumberVersion"
+    compile "info.cukes:cucumber-spring:$cucumberVersion"
+    compile "info.cukes:cucumber-junit:$cucumberVersion"
+    compile 'io.github.prashant-ramcharan:courgette-jvm:1.4.0'
+
+    compile "io.rest-assured:rest-assured:$restassuredVersion"
+    compile "org.easytesting:fest-assert-core:2.0M10"
+    compile "org.easytesting:fest-assert:1.4"
+
+    compile 'net.masterthought:cucumber-reporting:2.3.0'
+
+    ktlint 'com.github.shyiko:ktlint:0.8.1'
+}
+
+
+test {
+    reports.junitXml.enabled = false
+    ignoreFailures = true
+    reports.html.enabled = false
+    systemProperties java.lang.System.properties
+    testLogging {
+        showStandardStreams = 'true'
+        exceptionFormat = 'full'
+    }
+}
+
+task(report, type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'com.dsobko.test.ReportGenerator'
+}
+
+test.finalizedBy(report)
+
+task ktlint(type: JavaExec) {
+    main = "com.github.shyiko.ktlint.Main"
+    classpath = configurations.ktlint
+    args "src/**/*.kt"
+}
+
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec) {
+    main = "com.github.shyiko.ktlint.Main"
+    classpath = configurations.ktlint
+    args "-F", "src/**/*.kt"
+}
+
+gradle.startParameter.continueOnFailure = true
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}

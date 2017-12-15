@@ -1,0 +1,22 @@
+logging:
+  level:
+    org.springframework.web: 'INFO'
+  pattern:
+    console: "%date %5level [%thread] -- %-40.40logger{39} {%mdc{scenarioName}}: %msg%n%ex"
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:postgresql://10.1.10.10:5433/test}
+    username: ${DB_USER:test}
+    password: ${DB_PASSWORD:testpassword}
+
+test:
+  service:
+    host: ${HOST:https://test.dsobko.eu/server}
+    accountUrl: /api/accounts
+
+
+request.properties:
+  user: dsobko-client
+  secret: secret
